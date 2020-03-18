@@ -58,6 +58,10 @@ class UserRegistrationTest(test.APITestCase):
     """
 
     def test_user_registration(self):
+        """
+        Ensure we can register and that response
+        only contains authorized fields
+        """
         data = {'email': 'test@test.com', 'password': 'test67jss72h'}
         response = self.client.post(reverse('register'), data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
