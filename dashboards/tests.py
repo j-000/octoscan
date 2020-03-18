@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from rest_framework import test, status
 from rest_framework.authtoken.models import Token
 from .serializers import DashboardSerializer
+
 
 class TestDashboardsApi(test.APITestCase):
     """
@@ -35,3 +37,16 @@ class TestDashboardsApi(test.APITestCase):
         response = self.client.get(reverse('dashboards'), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), len(self.user.dashboards.all()))
+
+    def test_retrieve_single_dashboard(self):
+        """
+        Ensure user can retrieve a single dashboard from owned list
+        """
+        # Add a dashboard
+        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        self.client.post(reverse('dashboards'), data=data, format='json')
+        # Retrieve it
+        response = self.client.get(reverse('dashboards-retrieve', kwargs={'pk': 1}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
+        self.assertEqual(response.data.items(), DashboardSerializer(dashboard).data.items())

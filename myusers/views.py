@@ -8,6 +8,7 @@ class UserApiView(views.APIView):
     Global permissions: IsAuthenticated
     Global authentication: TokenAuthentication
 
+    api/profile/
     """
     def get(self, request):
         serializer = UserSerializer(request.user)
@@ -18,6 +19,8 @@ class UserRegistrationApiView(views.APIView):
     """
     No permissions or authentication required to register.
     Returns new user info.
+
+    api/register/
     """
     permission_classes = []
     authentication_classes = []

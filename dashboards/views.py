@@ -1,17 +1,15 @@
-from rest_framework import views, generics
+from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import DashboardSerializer
-from .models import Dashboard
 
 
 class DashboardAPiView(generics.GenericAPIView):
     """
-    api/dashboards
-    # """
-    # def perform_create(self, serializer):
-    #     print('CALLED')
-    #     serializer.save(owner=self.request.user)
+    Global permissions: IsAuthenticated
+    Global authentication: TokenAuthentication
 
+    api/dashboards/
+    """
     def get(self, request):
         """
         List all user's dashboards
@@ -30,3 +28,16 @@ class DashboardAPiView(generics.GenericAPIView):
             dash.save()
             return Response(dash.data)
         return Response(dash.errors)
+
+
+class DashboardRetrieveAPIView(generics.RetrieveAPIView):
+    """
+    Global permissions: IsAuthenticated
+    Global authentication: TokenAuthentication
+
+    api/dashboards/<int:pk>
+    """
+    serializer_class = DashboardSerializer
+
+    def get_queryset(self):
+        return self.request.user.dashboards.all()
