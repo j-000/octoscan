@@ -93,14 +93,25 @@ WSGI_APPLICATION = 'octoscan.wsgi.application'
 
 DATABASES = {
     'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'joao',
-            'USER': 'joao',
-            'PASSWORD': 'joaopostgres', # TODO: create an env variable for db username & password
-            'HOST': 'localhost',
-            'PORT': '5432',
-    }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'development.sqlite3',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
 }
+
+#DATABASES = {
+#     'default': {
+#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#             'NAME': 'joao',
+#             'USER': 'joao',
+#             'PASSWORD': 'joaopostgres', # TODO: create an env variable for db username & password
+#             'HOST': 'localhost',
+#             'PORT': '5432',
+#     }
+# }
 
 
 

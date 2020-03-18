@@ -3,28 +3,38 @@ from rest_framework import views, response
 from .serializers import UserSerializer
 
 
-User = get_user_model()
-
-
 class UserApiView(views.APIView):
     """
     Global permissions: IsAuthenticated
     Global authentication: TokenAuthentication
-    """
 
+    """
     def get(self, request):
         serializer = UserSerializer(request.user)
         return response.Response(serializer.data)
 
+
+class UserRegistrationApiView(views.APIView):
+    """
+    No permissions or authentication required to register.
+    Returns new user info.
+    """
+    permission_classes = []
+    authentication_classes = []
+
     def post(self, request):
-        return response.Response()
+        # Do not use UserSerializer to CREATE new users.
+        # User serializer excludes the 'password' field for
+        # security reasons and as a result it gets removed from
+        # serializer.data.
+        User = get_user_model()
+        if 'email' not in request.data.keys():
+            raise ValueError('Email is required.')
+        if 'password' not in request.data.keys():
+            raise ValueError('Password is required.')
 
-
-# class UserApiView(generics.RetrieveAPIView):
-#     permission_classes = [IsSelfPermission]
-#     serializer_class = UserSerializer
-#     queryset = User.objects.all()
-#
-#
-# class UserApiViewCreate(generics.CreateAPIView):
-#     serializer_class = UserSerializer
+        # Create the user safely using the create_user() method instead of the serializer option
+        new_user = User.objects.create_user(email=request.data['email'], password=request.data['password'])
+        # The serializer can be used to LIST/RETRIEVE
+        new_user_ser = UserSerializer(new_user)
+        return response.Response(new_user_ser.data)
