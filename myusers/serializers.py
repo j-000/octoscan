@@ -9,13 +9,21 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = get_user_model()
         exclude = [
-            'password',
             'last_login',
             'is_superuser',
             'is_staff',
             'groups',
             'user_permissions'
         ]
+        # password field will be required to register but
+        # will not be sent with the response or retrieval.
+        extra_kwargs = {'password': {'write_only': True}}
 
     def get_dashboard_count(self, user_obj):
         return len(user_obj.dashboards.all())
+
+    def create(self, validated_data):
+        user = get_user_model()(email=validated_data['email'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user

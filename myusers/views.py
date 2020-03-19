@@ -26,18 +26,11 @@ class UserRegistrationApiView(views.APIView):
     authentication_classes = []
 
     def post(self, request):
-        # Do not use UserSerializer to CREATE new users.
-        # User serializer excludes the 'password' field for
-        # security reasons and as a result it gets removed from
-        # serializer.data.
-        User = get_user_model()
-        if 'email' not in request.data.keys():
-            raise ValueError('Email is required.')
-        if 'password' not in request.data.keys():
-            raise ValueError('Password is required.')
-
-        # Create the user safely using the create_user() method instead of the serializer option
-        new_user = User.objects.create_user(email=request.data['email'], password=request.data['password'])
-        # The serializer can be used to LIST/RETRIEVE
-        new_user_ser = UserSerializer(new_user)
-        return response.Response(new_user_ser.data)
+        """
+        Create user using the serializer methods.
+        """
+        user = UserSerializer(data=request.data)
+        if user.is_valid():
+            user.save()
+            return response.Response(user.data)
+        return response.Response(user.errors)
