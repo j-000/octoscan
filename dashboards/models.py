@@ -10,3 +10,11 @@ class Dashboard(models.Model):
 
     def __str__(self):
         return '%d - %s' % (self.id, self.name)
+
+
+class PageModel(models.Model):
+    url = models.URLField(blank=False)
+    dashboard = models.ForeignKey(Dashboard, related_name='pages', on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return '%d - %s' % (self.id, self.url)
