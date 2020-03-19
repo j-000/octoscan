@@ -50,3 +50,16 @@ class TestDashboardsApi(test.APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
         self.assertEqual(response.data.items(), DashboardSerializer(dashboard).data.items())
+
+    def test_list_pages(self):
+        # Add a dashboard
+        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        self.client.post(reverse('dashboards'), data=data, format='json')
+
+        response = self.client.get(reverse('pages', kwargs={'dashboard_id': 1}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
+        self.assertEqual(len(response.data), len(dashboard.pages.all()))
+
+    def test_retrieve_page(self):
+        pass

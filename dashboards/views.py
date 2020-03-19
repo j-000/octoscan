@@ -1,6 +1,8 @@
 from rest_framework import generics
+from rest_framework import views
 from rest_framework.response import Response
-from .serializers import DashboardSerializer
+from .serializers import DashboardSerializer, PageSerializer
+from django.shortcuts import get_object_or_404
 
 
 class DashboardAPiView(generics.GenericAPIView):
@@ -41,3 +43,34 @@ class DashboardRetrieveAPIView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return self.request.user.dashboards.all()
+
+
+class DashboardPagesRetrieveAPIView(views.APIView):
+    """
+    Global permissions: IsAuthenticated
+    Global authentication: TokenAuthentication
+
+    api/dashboards/<int:dashboard_id>/pages/<int:page_id>/
+    """
+    def get(self, request, dashboard_id=None, page_id=None):
+        if not dashboard_id or not page_id:
+            return Response({'error': 'Missing parameters.'})
+        dashboard = get_object_or_404(request.user.dashboards.filter(id=dashboard_id))
+        page = get_object_or_404(dashboard.pages.filter(id=page_id))
+        page_ser = PageSerializer(page)
+        return Response(page_ser.data)
+
+
+class DashboardPagesListAPIView(views.APIView):
+    """
+    Global permissions: IsAuthenticated
+    Global authentication: TokenAuthentication
+
+    api/dashboards/<int:dashboard_id>/pages/
+    """
+    def get(self, request, dashboard_id=None):
+        if not dashboard_id:
+            return Response({'error': 'Missing parameters.'})
+        dashboard = get_object_or_404(request.user.dashboards.filter(id=dashboard_id))
+        page_ser = PageSerializer(dashboard.pages.all(), many=True)
+        return Response(page_ser.data)

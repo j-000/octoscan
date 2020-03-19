@@ -11,6 +11,10 @@ urlpatterns = [
     path('api/profile/', myusers_views.UserApiView.as_view(), name='profile'),
     path('api/dashboards/', dashboards_views.DashboardAPiView.as_view(), name='dashboards'),
     path('api/dashboards/<int:pk>', dashboards_views.DashboardRetrieveAPIView.as_view(), name='dashboards-retrieve'),
+    path('api/dashboards/<int:dashboard_id>/pages/',
+         dashboards_views.DashboardPagesListAPIView.as_view(), name='pages'),
+    path('api/dashboards/<int:dashboard_id>/pages/<int:page_id>/',
+         dashboards_views.DashboardPagesRetrieveAPIView.as_view(), name='page-details'),
 
     # Django admin area
     path('admin/', admin.site.urls),

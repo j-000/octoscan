@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Dashboard
+from .models import Dashboard, PageModel
 
 
 class DashboardSerializer(serializers.ModelSerializer):
@@ -7,7 +7,17 @@ class DashboardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dashboard
-        exclude = ['owner']
+        fields = '__all__'
+        # This excludes owner from the response or retrieve
+        extra_kwargs = {'owner': {'write_only': True}}
 
     def get_pages_count(self, dashboard_obj):
         return len(dashboard_obj.pages.all())
+
+
+class PageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PageModel
+        fields = '__all__'
+
