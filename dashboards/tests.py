@@ -62,4 +62,8 @@ class TestDashboardsApi(test.APITestCase):
         self.assertEqual(len(response.data), len(dashboard.pages.all()))
 
     def test_retrieve_page(self):
-        pass
+        # Add a dashboard
+        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        self.client.post(reverse('dashboards'), data=data, format='json')
+        response = self.client.get(reverse('page-details', kwargs={'dashboard_id': 1, 'page_id': 1}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
