@@ -1,28 +1,29 @@
 from rest_framework import generics
 from rest_framework import views
 from rest_framework.response import Response
-from .serializers import DashboardSerializer, PageSerializer
 from django.shortcuts import get_object_or_404
+from .serializers import DashboardSerializer, PageSerializer
 
 
-class DashboardAPiView(generics.GenericAPIView):
+class DashboardAPiView(generics.ListCreateAPIView):
     """
     Global permissions: IsAuthenticated
     Global authentication: TokenAuthentication
 
     api/dashboards/
     """
-    def get(self, request):
-        """
-        List all user's dashboards
-        """
-        user_dashboards = self.request.user.dashboards.all()
-        serializer = DashboardSerializer(user_dashboards, many=True)
-        return Response(serializer.data)
 
-    def post(self, request):
+    serializer_class = DashboardSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.dashboards.all()
+
+    def post(self, request, *args, **kwargs):
         """
-        Create a new dashboard
+        Overridden post method to include extra details in the post data
+        before saving.
+        Create a new dashboard.
         """
         request.data.update({'owner': request.user.id})
         dash = DashboardSerializer(data=request.data)
@@ -38,39 +39,55 @@ class DashboardRetrieveAPIView(generics.RetrieveAPIView):
     Global authentication: TokenAuthentication
 
     api/dashboards/<int:pk>
+    Returns a single dashboard instance based on <int:pk>
     """
     serializer_class = DashboardSerializer
 
     def get_queryset(self):
+        """
+        Automatically filter the user dashboards against <int:dashboard_id>
+        based on the QuerySet of all the user's dashboards.
+
+        Could have alternatively overridden .get_object() but would
+        have to implement the object permissions.
+        """
         return self.request.user.dashboards.all()
 
 
-class DashboardPagesRetrieveAPIView(views.APIView):
+class DashboardPagesRetrieveAPIView(generics.RetrieveAPIView):
     """
     Global permissions: IsAuthenticated
     Global authentication: TokenAuthentication
 
     api/dashboards/<int:dashboard_id>/pages/<int:page_id>/
     """
-    def get(self, request, dashboard_id=None, page_id=None):
-        if not dashboard_id or not page_id:
-            return Response({'error': 'Missing parameters.'})
-        dashboard = get_object_or_404(request.user.dashboards.filter(id=dashboard_id))
-        page = get_object_or_404(dashboard.pages.filter(id=page_id))
-        page_ser = PageSerializer(page)
-        return Response(page_ser.data)
+    serializer_class = PageSerializer
+
+    def get_queryset(self):
+        """
+        Filter the user dashboards against <int:dashboard_id> and then filter
+        the dashboard pages against <int:page_id> and return its details.
+        """
+        dashboard_id = self.kwargs['dashboard_id']
+        page_id = self.kwargs['page_id']
+        dashboard = get_object_or_404(self.request.user.dashboards.filter(id=dashboard_id))
+        return get_object_or_404(dashboard.pages.filter(id=page_id))
 
 
-class DashboardPagesListAPIView(views.APIView):
+class DashboardPagesListAPIView(generics.ListAPIView):
     """
     Global permissions: IsAuthenticated
     Global authentication: TokenAuthentication
 
     api/dashboards/<int:dashboard_id>/pages/
     """
-    def get(self, request, dashboard_id=None):
-        if not dashboard_id:
-            return Response({'error': 'Missing parameters.'})
-        dashboard = get_object_or_404(request.user.dashboards.filter(id=dashboard_id))
-        page_ser = PageSerializer(dashboard.pages.all(), many=True)
-        return Response(page_ser.data)
+    serializer_class = PageSerializer
+
+    def get_queryset(self):
+        """
+        Filter the user dashboards against <int:dashboard_id>
+        and then return all its pages.
+        """
+        dashboard_id = self.kwargs['dashboard_id']
+        dashboard = get_object_or_404(self.request.user.dashboards.filter(id=dashboard_id))
+        return dashboard.pages.all()
