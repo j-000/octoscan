@@ -4,6 +4,7 @@ from myusers import views as myusers_views
 from dashboards import views as dashboards_views
 from rest_framework.authtoken.views import obtain_auth_token
 
+
 urlpatterns = [
     # App views
     path('api/login/', obtain_auth_token, name='api_token_auth'),
