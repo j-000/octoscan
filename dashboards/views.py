@@ -62,7 +62,7 @@ class DashboardPagesRetrieveAPIView(generics.RetrieveAPIView):
     """
     serializer_class = PageSerializer
 
-    def get_queryset(self):
+    def get_object(self):
         """
         Filter the user dashboards against <int:dashboard_id> and then filter
         the dashboard pages against <int:page_id> and return its details.
@@ -70,8 +70,9 @@ class DashboardPagesRetrieveAPIView(generics.RetrieveAPIView):
         dashboard_id = self.kwargs['dashboard_id']
         page_id = self.kwargs['page_id']
         dashboard = get_object_or_404(self.request.user.dashboards.filter(id=dashboard_id))
-        return get_object_or_404(dashboard.pages.filter(id=page_id))
-
+        page = get_object_or_404(dashboard.pages.filter(id=page_id))
+        self.check_object_permissions(self.request, page)
+        return page
 
 class DashboardPagesListAPIView(generics.ListAPIView):
     """

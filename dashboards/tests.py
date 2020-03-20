@@ -3,8 +3,8 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from rest_framework import test, status
 from rest_framework.authtoken.models import Token
-from .serializers import DashboardSerializer
-
+from .serializers import DashboardSerializer, PageSerializer
+from .models import PageModel
 
 class TestDashboardsApi(test.APITestCase):
     """
@@ -64,6 +64,12 @@ class TestDashboardsApi(test.APITestCase):
     def test_retrieve_page(self):
         # Add a dashboard
         data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        # Users are not allowed to add pages but we will add one for testing purposes
         self.client.post(reverse('dashboards'), data=data, format='json')
+        dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
+        page = PageModel(url='http://www.teseter.com', dashboard=dashboard)
+        page.save()
         response = self.client.get(reverse('page-details', kwargs={'dashboard_id': 1, 'page_id': 1}), format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        page_data = PageSerializer(page)
+        self.assertGreaterEqual(response.data.items(), page_data.data.items())
