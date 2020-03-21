@@ -69,10 +69,12 @@ class DashboardPagesRetrieveAPIView(generics.RetrieveAPIView):
         """
         dashboard_id = self.kwargs['dashboard_id']
         page_id = self.kwargs['page_id']
-        dashboard = get_object_or_404(self.request.user.dashboards.filter(id=dashboard_id))
+        dashboard = get_object_or_404(
+            self.request.user.dashboards.filter(id=dashboard_id))
         page = get_object_or_404(dashboard.pages.filter(id=page_id))
         self.check_object_permissions(self.request, page)
         return page
+
 
 class DashboardPagesListAPIView(generics.ListAPIView):
     """
@@ -89,5 +91,6 @@ class DashboardPagesListAPIView(generics.ListAPIView):
         and then return all its pages.
         """
         dashboard_id = self.kwargs['dashboard_id']
-        dashboard = get_object_or_404(self.request.user.dashboards.filter(id=dashboard_id))
+        dashboard = get_object_or_404(
+            self.request.user.dashboards.filter(id=dashboard_id))
         return dashboard.pages.all()

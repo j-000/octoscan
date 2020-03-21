@@ -20,4 +20,3 @@ class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PageModel
         fields = '__all__'
-

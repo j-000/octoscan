@@ -16,14 +16,16 @@ class ObtainTokenTest(test.APITestCase):
         Create test user
         """
         User = get_user_model()
-        self.user = User.objects.create_user(email='test@test.com', password='test19931293')
+        self.user = User.objects.create_user(email='test@test.com',
+                                             password='test19931293')
 
     def test_get_token(self):
         """
         Ensure we can get an auth token
         """
         data = {'username': 'test@test.com', 'password': 'test19931293'}
-        response = self.client.post(reverse('api_token_auth'), data=data, format='json')
+        response = self.client.post(reverse('api_token_auth'), data=data,
+                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -37,7 +39,8 @@ class UserProfileTest(test.APITestCase):
         Create user and generate an authentication token
         """
         User = get_user_model()
-        self.user = User.objects.create_user(email='test@test.com', password='test19931293')
+        self.user = User.objects.create_user(email='test@test.com',
+                                             password='test19931293')
         self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
@@ -47,7 +50,8 @@ class UserProfileTest(test.APITestCase):
         """
         response = self.client.get(reverse('profile'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # serialize the user model and check the response is a subset of the dictionary
+        # serialize the user model and check the response is a subset
+        # of the dictionary
         user = UserSerializer(self.user)
         self.assertGreaterEqual(user.data.items(), response.data.items())
 
@@ -63,12 +67,15 @@ class UserRegistrationTest(test.APITestCase):
         only contains authorized fields
         """
         data = {'email': 'test@test.com', 'password': 'test67jss72h'}
-        response = self.client.post(reverse('register'), data=data, format='json')
+        response = self.client.post(reverse('register'), data=data,
+                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        new_user = UserSerializer(get_object_or_404(get_user_model().objects.filter(email=data['email'])))
+        new_user = UserSerializer(get_object_or_404(
+            get_user_model().objects.filter(email=data['email'])))
         # Assert the response is a subset of the user object dict
         self.assertGreaterEqual(new_user.data.items(), response.data.items())
 
-        prohibited_fields = ['password', 'is_staff', 'user_permissions', 'is_superuser']
+        prohibited_fields = ['password', 'is_staff', 'user_permissions',
+                             'is_superuser']
         for field in prohibited_fields:
             self.assertNotIn(field, response.data.keys())

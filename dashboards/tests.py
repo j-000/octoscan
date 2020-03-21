@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from .serializers import DashboardSerializer, PageSerializer
 from .models import PageModel
 
+
 class TestDashboardsApi(test.APITestCase):
     """
     api/dashboards/
@@ -15,7 +16,8 @@ class TestDashboardsApi(test.APITestCase):
         Create a test user and login. Configure client with token.
         """
         User = get_user_model()
-        self.user = User.objects.create_user(email='test@test.com', password='test19931293')
+        self.user = User.objects.create_user(email='test@test.com',
+                                             password='test19931293')
         token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
@@ -24,11 +26,15 @@ class TestDashboardsApi(test.APITestCase):
         Ensure the user can create a new dashboard.
         Ensure the response is the dashboard created.
         """
-        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
-        response = self.client.post(reverse('dashboards'), data=data, format='json')
+        data = {'url': 'http://www.sjajsjaod.com',
+                'name': 'Test dashboard name'}
+        response = self.client.post(reverse('dashboards'), data=data,
+                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        new_dashboard = DashboardSerializer(self.user.dashboards.filter(name=data['name'])[0])
-        self.assertGreaterEqual(response.data.items(), new_dashboard.data.items())
+        new_dashboard = DashboardSerializer(
+            self.user.dashboards.filter(name=data['name'])[0])
+        self.assertGreaterEqual(response.data.items(),
+                                new_dashboard.data.items())
 
     def test_get_dashboards(self):
         """
@@ -43,33 +49,44 @@ class TestDashboardsApi(test.APITestCase):
         Ensure user can retrieve a single dashboard from owned list
         """
         # Add a dashboard
-        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        data = {'url': 'http://www.sjajsjaod.com',
+                'name': 'Test dashboard name'}
         self.client.post(reverse('dashboards'), data=data, format='json')
         # Retrieve it
-        response = self.client.get(reverse('dashboards-retrieve', kwargs={'pk': 1}), format='json')
+        response = self.client.get(reverse('dashboards-retrieve',
+                                           kwargs={'pk': 1}), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
-        self.assertEqual(response.data.items(), DashboardSerializer(dashboard).data.items())
+        self.assertEqual(response.data.items(),
+                         DashboardSerializer(dashboard).data.items())
 
     def test_list_pages(self):
         # Add a dashboard
-        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
+        data = {'url': 'http://www.sjajsjaod.com',
+                'name': 'Test dashboard name'}
         self.client.post(reverse('dashboards'), data=data, format='json')
 
-        response = self.client.get(reverse('pages', kwargs={'dashboard_id': 1}), format='json')
+        response = self.client.get(reverse('pages',
+                                           kwargs={'dashboard_id': 1}),
+                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
         self.assertEqual(len(response.data), len(dashboard.pages.all()))
 
     def test_retrieve_page(self):
         # Add a dashboard
-        data = {'url': 'http://www.sjajsjaod.com', 'name': 'Test dashboard name'}
-        # Users are not allowed to add pages but we will add one for testing purposes
+        data = {'url': 'http://www.sjajsjaod.com',
+                'name': 'Test dashboard name'}
+        # Users are not allowed to add pages but we will add one for testing
+        # purposes
         self.client.post(reverse('dashboards'), data=data, format='json')
         dashboard = get_object_or_404(self.user.dashboards.filter(id=1))
         page = PageModel(url='http://www.teseter.com', dashboard=dashboard)
         page.save()
-        response = self.client.get(reverse('page-details', kwargs={'dashboard_id': 1, 'page_id': 1}), format='json')
+        response = self.client.get(reverse('page-details',
+                                           kwargs={'dashboard_id': 1,
+                                                   'page_id': 1}),
+                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         page_data = PageSerializer(page)
         self.assertGreaterEqual(response.data.items(), page_data.data.items())

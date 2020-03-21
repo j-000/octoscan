@@ -52,7 +52,8 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
-    Custom user model. Inherits is_superuser, groups, user_permissions from PermissionsMixin
+    Custom user model. Inherits is_superuser, groups, user_permissions
+    from PermissionsMixin
     and password, last_login, is_active from AbstractBaseUser.
     """
 
